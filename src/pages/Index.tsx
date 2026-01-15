@@ -4,8 +4,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import OnboardingFlow from '@/components/OnboardingFlow';
+import DashboardStats from '@/components/DashboardStats';
+import HabitsList from '@/components/HabitsList';
+import PremiumPaywall from '@/components/PremiumPaywall';
 
 type Habit = {
   id: string;
@@ -62,24 +65,6 @@ const Index = () => {
     { name: 'Продуктивность', icon: 'Zap', color: 'bg-orange-100 text-orange-600' }
   ];
 
-  const onboardingSteps = [
-    {
-      title: 'Добро пожаловать в трекер качества жизни',
-      description: 'Контролируйте привычки, анализируйте прогресс и управляйте хаосом в вашей жизни',
-      icon: 'Sparkles'
-    },
-    {
-      title: 'Выберите сферы жизни',
-      description: 'Какие области важны для вас? Выберите категории для отслеживания',
-      icon: 'Target'
-    },
-    {
-      title: 'Создайте первую привычку',
-      description: 'Начните с малого — добавьте одну привычку, которую хотите развить',
-      icon: 'Plus'
-    }
-  ];
-
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>
       prev.includes(category)
@@ -104,90 +89,14 @@ const Index = () => {
 
   if (showOnboarding) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl p-8 animate-scale-in shadow-xl border-0">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-              <Icon name={onboardingSteps[onboardingStep].icon} size={32} className="text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold mb-2">{onboardingSteps[onboardingStep].title}</h1>
-            <p className="text-muted-foreground text-lg">
-              {onboardingSteps[onboardingStep].description}
-            </p>
-          </div>
-
-          {onboardingStep === 1 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-              {categories.map((cat) => (
-                <button
-                  key={cat.name}
-                  onClick={() => toggleCategory(cat.name)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    selectedCategories.includes(cat.name)
-                      ? 'border-primary bg-primary/5 scale-105'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className={`w-10 h-10 rounded-lg ${cat.color} flex items-center justify-center mx-auto mb-2`}>
-                    <Icon name={cat.icon} size={20} />
-                  </div>
-                  <p className="text-sm font-medium">{cat.name}</p>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {onboardingStep === 2 && (
-            <div className="mb-8">
-              <Input
-                placeholder="Например: Пить 2 литра воды"
-                className="text-lg h-14 mb-4"
-              />
-              <div className="flex gap-2">
-                {categories.slice(0, 3).map((cat) => (
-                  <Badge key={cat.name} variant="secondary" className="cursor-pointer">
-                    {cat.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              {onboardingSteps.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`h-2 rounded-full transition-all ${
-                    idx === onboardingStep ? 'w-8 bg-primary' : 'w-2 bg-muted'
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              {onboardingStep > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={() => setOnboardingStep(prev => prev - 1)}
-                >
-                  Назад
-                </Button>
-              )}
-              <Button
-                onClick={() => {
-                  if (onboardingStep < onboardingSteps.length - 1) {
-                    setOnboardingStep(prev => prev + 1);
-                  } else {
-                    setShowOnboarding(false);
-                  }
-                }}
-              >
-                {onboardingStep === onboardingSteps.length - 1 ? 'Начать' : 'Далее'}
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
+      <OnboardingFlow
+        onboardingStep={onboardingStep}
+        setOnboardingStep={setOnboardingStep}
+        selectedCategories={selectedCategories}
+        toggleCategory={toggleCategory}
+        categories={categories}
+        onComplete={() => setShowOnboarding(false)}
+      />
     );
   }
 
@@ -236,41 +145,12 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="p-6 animate-slide-up hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Icon name="Target" size={24} className="text-primary" />
-              </div>
-              <Badge variant="secondary">{completionRate}%</Badge>
-            </div>
-            <h3 className="text-2xl font-bold mb-1">{habits.filter(h => h.completedToday).length}/{habits.length}</h3>
-            <p className="text-sm text-muted-foreground">Привычек выполнено</p>
-            <Progress value={completionRate} className="mt-3" />
-          </Card>
-
-          <Card className="p-6 animate-slide-up hover:shadow-lg transition-shadow" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                <Icon name="Flame" size={24} className="text-green-600" />
-              </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-700">Активно</Badge>
-            </div>
-            <h3 className="text-2xl font-bold mb-1">{totalStreak} дней</h3>
-            <p className="text-sm text-muted-foreground">Общий streak</p>
-          </Card>
-
-          <Card className="p-6 animate-slide-up hover:shadow-lg transition-shadow" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                <Icon name="TrendingUp" size={24} className="text-blue-600" />
-              </div>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">+12%</Badge>
-            </div>
-            <h3 className="text-2xl font-bold mb-1">85%</h3>
-            <p className="text-sm text-muted-foreground">Средний прогресс</p>
-          </Card>
-        </div>
+        <DashboardStats
+          completionRate={completionRate}
+          completedCount={habits.filter(h => h.completedToday).length}
+          totalCount={habits.length}
+          totalStreak={totalStreak}
+        />
 
         <Tabs defaultValue="habits" className="space-y-6">
           <TabsList className="bg-muted">
@@ -280,59 +160,7 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="habits" className="space-y-4">
-            {habits.map((habit, idx) => (
-              <Card
-                key={habit.id}
-                className="p-6 animate-fade-in hover:shadow-lg transition-all"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <button
-                      onClick={() => toggleHabit(habit.id)}
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                        habit.completedToday
-                          ? habit.color + ' text-white scale-105'
-                          : 'bg-muted text-muted-foreground hover:scale-105'
-                      }`}
-                    >
-                      <Icon name={habit.completedToday ? 'Check' : 'Circle'} size={24} />
-                    </button>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-1">{habit.title}</h3>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Icon name="Flame" size={16} />
-                          {habit.streak} дней streak
-                        </span>
-                        <Badge variant="secondary" className="text-xs">
-                          {habit.category}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon">
-                    <Icon name="MoreHorizontal" size={20} />
-                  </Button>
-                </div>
-
-                <div className="flex gap-1">
-                  {habit.weekProgress.map((completed, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex-1 h-2 rounded-full transition-all ${
-                        completed ? habit.color : 'bg-muted'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </Card>
-            ))}
-
-            <Button className="w-full h-14" variant="outline">
-              <Icon name="Plus" size={20} className="mr-2" />
-              Добавить привычку
-            </Button>
+            <HabitsList habits={habits} toggleHabit={toggleHabit} />
           </TabsContent>
 
           <TabsContent value="analytics">
@@ -476,63 +304,13 @@ const Index = () => {
       </main>
 
       {showPaywall && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <Card className="w-full max-w-lg p-8 animate-scale-in relative">
-            <button
-              onClick={() => setShowPaywall(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-            >
-              <Icon name="X" size={24} />
-            </button>
-
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mx-auto mb-4">
-                <Icon name="Crown" size={32} className="text-white" />
-              </div>
-              <h2 className="text-3xl font-bold mb-2">Quality of Life Premium</h2>
-              <p className="text-muted-foreground">
-                Разблокируйте все возможности для полного контроля вашей жизни
-              </p>
-            </div>
-
-            <div className="bg-muted/50 rounded-xl p-6 mb-6">
-              <div className="flex items-baseline justify-center mb-4">
-                <span className="text-5xl font-bold">100₽</span>
-                <span className="text-muted-foreground ml-2">/месяц</span>
-              </div>
-              <div className="space-y-3">
-                {[
-                  'Расширенная аналитика с графиками трендов',
-                  'AI-инсайты и персональные рекомендации',
-                  'Контроль хаоса по всем сферам жизни',
-                  'Экспорт данных и отчёты',
-                  'Неограниченное количество привычек',
-                  'Приоритетная поддержка'
-                ].map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Icon name="Check" size={14} className="text-primary" />
-                    </div>
-                    <span className="text-sm">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              className="w-full h-12 text-lg mb-3"
-              onClick={() => {
-                setIsPremium(true);
-                setShowPaywall(false);
-              }}
-            >
-              Оформить Premium за 100₽/мес
-            </Button>
-            <p className="text-xs text-center text-muted-foreground">
-              Отменить можно в любой момент. Без скрытых платежей.
-            </p>
-          </Card>
-        </div>
+        <PremiumPaywall
+          onClose={() => setShowPaywall(false)}
+          onSubscribe={() => {
+            setIsPremium(true);
+            setShowPaywall(false);
+          }}
+        />
       )}
     </div>
   );
