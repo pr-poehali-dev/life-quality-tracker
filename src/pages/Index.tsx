@@ -21,6 +21,8 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isPremium, setIsPremium] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [habits, setHabits] = useState<Habit[]>([
     {
       id: '1',
@@ -199,7 +201,7 @@ const Index = () => {
             </div>
             <span className="font-semibold text-lg">Quality of Life</span>
           </div>
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
             <button className="text-sm font-medium text-primary">Главная</button>
             <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
               Привычки
@@ -210,6 +212,18 @@ const Index = () => {
             <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
               Трекер
             </button>
+            {!isPremium && (
+              <Button size="sm" onClick={() => setShowPaywall(true)} className="ml-4">
+                <Icon name="Crown" size={16} className="mr-1" />
+                Premium
+              </Button>
+            )}
+            {isPremium && (
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 ml-4">
+                <Icon name="Crown" size={14} className="mr-1" />
+                Premium
+              </Badge>
+            )}
           </div>
         </div>
       </nav>
@@ -322,7 +336,25 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {!isPremium && (
+              <Card className="p-6 mb-6 border-2 border-primary/20 bg-gradient-to-r from-purple-50 to-blue-50">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Crown" size={24} className="text-yellow-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-1">Расширенная аналитика — Premium</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Получите доступ к детальным графикам, трендам и персональным инсайтам всего за 100₽/месяц
+                    </p>
+                    <Button onClick={() => setShowPaywall(true)} size="sm">
+                      Разблокировать за 100₽/мес
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ filter: !isPremium ? 'blur(4px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto' }}>
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Icon name="BarChart3" size={20} />
@@ -391,7 +423,25 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="chaos">
-            <Card className="p-6">
+            {!isPremium && (
+              <Card className="p-6 mb-6 border-2 border-primary/20 bg-gradient-to-r from-purple-50 to-blue-50">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                    <Icon name="Crown" size={24} className="text-yellow-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-1">Контроль хаоса — Premium</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Отслеживайте баланс всех сфер жизни с AI-рекомендациями за 100₽/месяц
+                    </p>
+                    <Button onClick={() => setShowPaywall(true)} size="sm">
+                      Разблокировать за 100₽/мес
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+            <Card className="p-6" style={{ filter: !isPremium ? 'blur(4px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto' }}>
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Icon name="Gauge" size={20} />
                 Уровень контроля жизни
@@ -424,6 +474,66 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {showPaywall && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <Card className="w-full max-w-lg p-8 animate-scale-in relative">
+            <button
+              onClick={() => setShowPaywall(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            >
+              <Icon name="X" size={24} />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mx-auto mb-4">
+                <Icon name="Crown" size={32} className="text-white" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">Quality of Life Premium</h2>
+              <p className="text-muted-foreground">
+                Разблокируйте все возможности для полного контроля вашей жизни
+              </p>
+            </div>
+
+            <div className="bg-muted/50 rounded-xl p-6 mb-6">
+              <div className="flex items-baseline justify-center mb-4">
+                <span className="text-5xl font-bold">100₽</span>
+                <span className="text-muted-foreground ml-2">/месяц</span>
+              </div>
+              <div className="space-y-3">
+                {[
+                  'Расширенная аналитика с графиками трендов',
+                  'AI-инсайты и персональные рекомендации',
+                  'Контроль хаоса по всем сферам жизни',
+                  'Экспорт данных и отчёты',
+                  'Неограниченное количество привычек',
+                  'Приоритетная поддержка'
+                ].map((feature, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Icon name="Check" size={14} className="text-primary" />
+                    </div>
+                    <span className="text-sm">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Button
+              className="w-full h-12 text-lg mb-3"
+              onClick={() => {
+                setIsPremium(true);
+                setShowPaywall(false);
+              }}
+            >
+              Оформить Premium за 100₽/мес
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Отменить можно в любой момент. Без скрытых платежей.
+            </p>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
